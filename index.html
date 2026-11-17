@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SignStudio 3D — Interactive ASL Learning & Recognition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/studio.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- TOP NAVIGATION BAR -->
+  <header id="topbar" class="topbar hidden">
+    <div class="topbar-inner">
+      <div class="brand" id="nav-brand">
+        <div class="brand-icon"><i class="fa-solid fa-hands-asl-interpreting"></i></div>
+        <div>
+          <div class="brand-title">SignStudio 3D</div>
+          <div class="brand-sub">Spatial ASL Academy</div>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button id="btn-nav-library" class="btn btn-ghost btn-sm">
+          <i class="fa-solid fa-grid-2"></i> Sign Library
+        </button>
+        <button id="btn-nav-admin" class="btn btn-cyan btn-sm hidden">
+          <i class="fa-solid fa-sliders"></i> Admin Studio
+        </button>
+        <div class="user-pill">
+          <i class="fa-regular fa-circle-user"></i>
+          <span id="nav-username">Learner</span>
+          <span id="nav-role" class="role-badge">Student</span>
+        </div>
+        <button id="btn-logout" class="btn btn-ghost btn-sm" title="Sign Out">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ==================== 1. HERO & LOGIN VIEW ==================== -->
+    <section id="view-auth" class="hero-grid">
+      <div>
+        <div class="hero-eyebrow">
+          <i class="fa-solid fa-cube"></i> Video + 3D Articulated Hand + Live CV Vision
+        </div>
+        <h1 class="hero-title">
+          Master Sign Language in <span>Three Dimensions.</span>
+        </h1>
+        <p class="hero-desc">
+          Watch native reference videos, inspect exact finger joint angles on an interactive 3D hand rig when you need spatial clarity, and verify your form in real time with computer vision.
+        </p>
+
+        <div class="pipeline-steps">
+          <div class="step-chip">
+            <div class="num mono">01 / LIBRARY</div>
+            <div class="label">Pick a Sign</div>
+          </div>
+          <div class="step-chip">
+            <div class="num mono">02 / VIDEO</div>
+            <div class="label">Watch Demo</div>
+          </div>
+          <div class="step-chip">
+            <div class="num mono">03 / 3D RIG</div>
+            <div class="label">360° Hand View</div>
+          </div>
+          <div class="step-chip">
+            <div class="num mono">04 / VISION</div>
+            <div class="label">Live AI Test</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active" data-role="student">Student Portal</button>
+          <button type="button" class="auth-tab" data-role="admin">Admin Studio</button>
+        </div>
+
+        <form id="auth-form">
+          <div class="form-group">
+            <label class="form-label" for="auth-name">Display Name</label>
+            <input id="auth-name" class="form-input" type="text" placeholder="e.g., Alex Morgan" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="auth-email">Email Address</label>
+            <input id="auth-email" class="form-input" type="email" placeholder="alex@signstudio.edu" required />
+          </div>
+
+          <div id="admin-pass-group" class="form-group hidden">
+            <label class="form-label" for="auth-pass">Admin Access Passcode</label>
+            <input id="auth-pass" class="form-input" type="password" placeholder="Default: admin123" />
+          </div>
+
+          <div id="auth-error" class="auth-error"></div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.82rem;">
+            <span id="auth-submit-label">Enter Sign Library</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==================== 2. SIGN LIBRARY VIEW ==================== -->
+    <section id="view-library" class="hidden">
+      <div class="library-header">
+        <div>
+          <h2 class="page-title">Curriculum Library</h2>
+          <p class="page-sub">Select any sign to watch the reference video, explore its 3D hand posture, and test on camera.</p>
+        </div>
+
+        <div class="mastery-widget">
+          <div class="mastery-top">
+            <span>Course Mastery</span>
+            <span id="mastery-count" class="mono">0 / 13 Mastered</span>
+          </div>
+          <div class="progress-track">
+            <div id="mastery-bar" class="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="filter-pills" id="category-filters">
+          <button class="pill active" data-cat="All">All Signs (13)</button>
+          <button class="pill" data-cat="Alphabet">Alphabet</button>
+          <button class="pill" data-cat="Numbers">Numbers</button>
+          <button class="pill" data-cat="Phrases">Everyday Phrases</button>
+        </div>
+
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input id="library-search" class="form-input" type="text" placeholder="Search A, 1, Love You, Help..." />
+        </div>
+      </div>
+
+      <div id="sign-grid" class="sign-grid"></div>
+    </section>
+
+    <!-- ==================== 3. VIDEO LESSON STAGE (PART 2) ==================== -->
+    <section id="view-learn" class="hidden"></section>
+
+    <!-- ==================== 4. 3D HAND VIEWER STAGE (PART 2) ==================== -->
+    <section id="view-3d" class="hidden"></section>
+
+    <!-- ==================== 5. LIVE CAMERA TEST STAGE (PART 3) ==================== -->
+    <section id="view-test" class="hidden"></section>
+
+    <!-- ==================== 6. ADMIN STUDIO STAGE (PART 4) ==================== -->
+    <section id="view-admin" class="hidden"></section>
+
+  </main>
+
+  <script type="module">
+    import { DEFAULT_SIGNS } from './js/signs-data.js';
+
+    const STATE = {
+      user: JSON.parse(localStorage.getItem('ss_user') || 'null'),
+      mastered: JSON.parse(localStorage.getItem('ss_mastered') || '[]'),
+      signs: [...DEFAULT_SIGNS],
+      selectedCategory: 'All',
+      searchQuery: '',
+      activeSign: null,
+      selectedLoginRole: 'student',
+    };
+
+    window.SignStudio = { STATE, navigate, renderLibrary };
+
+    const views = ['auth', 'library', 'learn', '3d', 'test', 'admin'];
+    function navigate(viewName) {
+      views.forEach((v) => {
+        document.getElementById(`view-${v}`).classList.toggle('hidden', v !== viewName);
+      });
+      const topbar = document.getElementById('topbar');
+      topbar.classList.toggle('hidden', viewName === 'auth');
+
+      if (viewName === 'library') renderLibrary();
+    }
+
+    /* ---------- AUTH & HERO LOGIC ---------- */
+    document.querySelectorAll('.auth-tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.auth-tab').forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
+        STATE.selectedLoginRole = tab.dataset.role;
+
+        const isAdmin = STATE.selectedLoginRole === 'admin';
+        document.getElementById('admin-pass-group').classList.toggle('hidden', !isAdmin);
+        document.getElementById('auth-submit-label').textContent = isAdmin
+          ? 'Enter Admin Studio'
+          : 'Enter Sign Library';
+        document.getElementById('auth-error').textContent = '';
+      });
+    });
+
+    document.getElementById('auth-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('auth-name').value.trim();
+      const email = document.getElementById('auth-email').value.trim();
+      const pass = document.getElementById('auth-pass').value;
+      const errEl = document.getElementById('auth-error');
+
+      if (STATE.selectedLoginRole === 'admin' && pass !== 'admin123') {
+        errEl.textContent = 'Invalid admin passcode (hint: use admin123).';
+        return;
+      }
+
+      errEl.textContent = '';
+      STATE.user = { name, email, role: STATE.selectedLoginRole };
+      localStorage.setItem('ss_user', JSON.stringify(STATE.user));
+      syncUserHeader();
+      navigate(STATE.user.role === 'admin' ? 'admin' : 'library');
+    });
+
+    function syncUserHeader() {
+      if (!STATE.user) return;
+      document.getElementById('nav-username').textContent = STATE.user.name;
+      const roleEl = document.getElementById('nav-role');
+      const isAdmin = STATE.user.role === 'admin';
+      roleEl.textContent = isAdmin ? 'Admin' : 'Student';
+      roleEl.classList.toggle('admin', isAdmin);
+      document.getElementById('btn-nav-admin').classList.toggle('hidden', !isAdmin);
+    }
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      localStorage.removeItem('ss_user');
+      STATE.user = null;
+      navigate('auth');
+    });
+
+    document.getElementById('btn-nav-library').addEventListener('click', () => navigate('library'));
+    document.getElementById('nav-brand').addEventListener('click', () => navigate('library'));
+    document.getElementById('btn-nav-admin').addEventListener('click', () => navigate('admin'));
+
+    /* ---------- SIGN LIBRARY RENDERER ---------- */
+    function renderLibrary() {
+      const grid = document.getElementById('sign-grid');
+      const q = STATE.searchQuery.toLowerCase();
+
+      const filtered = STATE.signs.filter((s) => {
+        const matchesCat = STATE.selectedCategory === 'All' || s.category === STATE.selectedCategory;
+        const matchesQuery =
+          s.name.toLowerCase().includes(q) || s.hint.toLowerCase().includes(q);
+        return matchesCat && matchesQuery;
+      });
+
+      const masteredCount = STATE.signs.filter((s) => STATE.mastered.includes(s.id)).length;
+      document.getElementById('mastery-count').textContent = `${masteredCount} / ${STATE.signs.length} Mastered`;
+      document.getElementById('mastery-bar').style.width = `${(masteredCount / STATE.signs.length) * 100}%`;
+
+      grid.innerHTML = filtered
+        .map((sign) => {
+          const isMastered = STATE.mastered.includes(sign.id);
+          return `
+            <article class="sign-card ${isMastered ? 'mastered' : ''}" data-id="${sign.id}">
+              <div>
+                <div class="card-top">
+                  <div class="sign-glyph">${sign.glyph}</div>
+                  <div class="badges">
+                    <span class="badge ${sign.type === 'move' ? 'move' : ''}">
+                      ${sign.type === 'move' ? 'Dynamic Motion' : 'Static Shape'}
+                    </span>
+                    ${isMastered ? '<span class="badge done"><i class="fa-solid fa-check"></i> Mastered</span>' : `<span class="badge">${sign.hands} Hand${sign.hands > 1 ? 's' : ''}</span>`}
+                  </div>
+                </div>
+                <h3 style="margin-top: 0.9rem;">${sign.name}</h3>
+                <p>${sign.hint}</p>
+              </div>
+              <div class="card-footer">
+                <span>${sign.category}</span>
+                <span class="card-cta">Start Lesson <i class="fa-solid fa-arrow-right"></i></span>
+              </div>
+            </article>
+          `;
+        })
+        .join('');
+
+      grid.querySelectorAll('.sign-card').forEach((card) => {
+        card.addEventListener('click', () => {
+          const sign = STATE.signs.find((s) => s.id === card.dataset.id);
+          if (!sign) return;
+          STATE.activeSign = sign;
+          if (window.openLearnStage) {
+            window.openLearnStage(sign);
+          } else {
+            // Temporary preview screen until Part 2 is attached
+            const learnEl = document.getElementById('view-learn');
+            learnEl.innerHTML = `
+              <div class="stage-card">
+                <button class="btn btn-ghost btn-sm" onclick="window.SignStudio.navigate('library')">
+                  <i class="fa-solid fa-arrow-left"></i> Back to Library
+                </button>
+                <h2 style="margin-top:1rem;">Selected Sign: ${sign.name} (${sign.category})</h2>
+                <p style="color:var(--text-secondary); margin:0.5rem 0 1.25rem;">${sign.hint}</p>
+                <div class="badge">Ready for Part 2: Video Player + 3D Hand Viewer (${sign.pose3D})</div>
+              </div>
+            `;
+            navigate('learn');
+          }
+        });
+      });
+    }
+
+    document.querySelectorAll('#category-filters .pill').forEach((pill) => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#category-filters .pill').forEach((p) => p.classList.remove('active'));
+        pill.classList.add('active');
+        STATE.selectedCategory = pill.dataset.cat;
+        renderLibrary();
+      });
+    });
+
+    document.getElementById('library-search').addEventListener('input', (e) => {
+      STATE.searchQuery = e.target.value;
+      renderLibrary();
+    });
+
+    /* ---------- INITIALIZE ---------- */
+    if (STATE.user) {
+      syncUserHeader();
+      navigate(STATE.user.role === 'admin' ? 'admin' : 'library');
+    } else {
+      navigate('auth');
+    }
+  </script>
+  <script type="module" src="js/viewer3d.js"></script>
+  <script type="module" src="js/tracker.js"></script>
+</body>
+</html>
